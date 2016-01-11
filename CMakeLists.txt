@@ -4,6 +4,9 @@
 
 cmake_minimum_required(VERSION 2.6)
 
+set(lib_name l10n)
+string(TOUPPER ${lib_name} LIB_NAME)
+
 if (NOT PROJECT_PREFIX)
     set(PROJECT_PREFIX tip)
 endif()
@@ -25,6 +28,10 @@ else()
     set(PROJECT_VERSION ${_pversion})
 endif()
 
+if(NOT CEREAL_INCLUDE_DIR)
+    message(FATAL_ERROR "Please set CEREAL_INCLUDE_DIR (requires cereal fork https://github.com/zmij/cereal)")
+endif()
+
 add_definitions("-std=c++11")
 
 set(BOOST_COMPONENTS
@@ -39,14 +46,16 @@ find_package(OpenSSL REQUIRED)
 include_directories(
     ${Boost_INCLUDE_DIRS} 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CEREAL_INCLUDE_DIR}
 )
 
-set(TIP_L10N_LIB ${PROJECT_PREFIX}-l10n)
+set(TIP_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name})
 
 add_subdirectory(include/tip)
 add_subdirectory(src)
 
 get_directory_property(has_parent PARENT_DIRECTORY)
 if (has_parent)
-    set(TIP_L10N_LIB ${PROJECT_PREFIX}-l10n PARENT_SCOPE)
+    set(TIP_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name} CACHE INTERNAL "Name of tip-util library target")
+    set(TIP_${LIB_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "Path to tip-util libaray includes" )
 endif()
