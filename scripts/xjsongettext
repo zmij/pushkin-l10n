@@ -1,0 +1,214 @@
+#!/usr/bin/perl
+
+use strict;
+use JSON;
+use Getopt::Long;
+use Cwd;
+
+use Data::Dumper;
+
+my $out_file = "messages.po";
+my %options = (
+	copyright	=> 'COPYRIGHT',
+	package 	=> 'PACKAGE',
+	version	=> 'VERSION',
+	bugs		=> 'MAINTENER <EMAIL@ADDRESS>'
+);
+
+my $root_dir = cwd();
+
+GetOptions (
+	"output|o=s"				=> \$out_file,
+	"copyright-holder=s"		=> \$options{copyright},
+	"foreign-user"			=> sub { undef $options{copyright} },
+	"package-names=s"			=> \$options{package},
+	"package-version=s"		=> \$options{version},
+	"msgid-bugs-address=s"	=> \$options{bugs}
+);
+
+my $JSON = JSON->new->utf8->pretty(0)->ascii(0)->canonical(1);
+
+my $messages = {};
+
+foreach my $fname (@ARGV) {
+	my $fh = undef;
+	open($fh, "<", $fname) or die "Failed to open $fname";
+	my $json  = undef;
+	my $json_str = join('',  <$fh>);
+	eval { $json = $JSON->decode($json_str) };
+	if ($@) {
+		die "Invalid JSON in file $fname: $@";
+	}
+	$fname =~ s/^$root_dir//;
+	traverse_json($messages, $json, $fname);
+}
+
+my $ofh = undef;
+open($ofh, ">", $out_file) or die "Failed to open $out_file";
+my $prev = select($ofh);
+
+print_pot_header();
+my $ctx = delete $messages->{""};
+print_context($ctx, "");
+map {
+	print_context($messages->{$_}, $_);
+} sort keys %$messages;
+select($prev);
+
+sub traverse_json {
+	my ($pot, $node, $fname) = splice(@_, 0, 3);
+	my @path = @_;
+	
+	if (ref ($node) eq 'ARRAY') {
+		map {
+			traverse_json($pot, $node->[$_], $fname, @path, $_)
+		} grep { ref $node->[$_] } 0 .. $#$node;
+		if ($node->[0] =~ m/^L10(\w+)\b/ ) {
+			# Process localization
+			process_l10n_message($pot, $node, $1, $fname, @path);
+		}
+	} elsif (ref ($node) eq 'HASH') {
+		# Traverse subkeys
+		map { 
+			traverse_json($pot, $node->{$_}, $fname, @path, $_)
+		} grep { ref $node->{$_} } keys %$node;
+	}
+}
+
+sub process_l10n_message {
+	my ($pot, $node, $type, $fname) = splice (@_, 0, 4);
+	my @path = @_;
+	my $ref = "$fname:" .  join('/', @path );
+	my $msg;
+	if ($type eq 'N') {
+		$msg = create_l10n_message( $pot, msgid => $node->[1], refs => [ $ref ] );
+	} elsif ($type eq 'NN') {
+		$msg = create_l10n_message( $pot, msgid => $node->[1], msgplural => $node->[2], refs => [ $ref ]  );
+	} elsif ($type eq 'NC') {
+		$msg = create_l10n_message( $pot, msgid => $node->[2], msgctx => $node->[1], refs => [ $ref ]  );
+	} elsif ($type eq 'NNC') {
+		$msg = create_l10n_message( $pot, msgid => $node->[2], msgplural => $node->[3] , msgctx => $node->[1], refs => [ $ref ]  );
+	}
+}
+
+sub create_l10n_message {
+	my $pot = shift;
+	my $msg = {
+		msgid		=> undef,
+		msgctx		=> undef,
+		msgplural		=> undef,
+		refs			=> [],
+		@_
+	};
+	
+	for my $key ( qw( msgid msgctx msgplural ) ) {
+		if (ref($msg->{$key})) {
+			die "Cannot localize non-scalars at $msg->{refs}[0]";
+		}
+	}
+	
+	my $ctx = get_context($pot, $msg->{msgctx});
+	$ctx->{ $msg->{msgid} } //= {};
+	merge_msg($ctx->{ $msg->{msgid} }, $msg, $msg->{msgplural} ? 'plural' : 'single');
+	return $msg;
+}
+
+sub get_context {
+	my ($pot, $ctx_name) = splice(@_, 0, 2);
+	$ctx_name //= "";
+	$pot->{$ctx_name} //= {};
+	return $pot->{$ctx_name};
+}
+
+sub merge_msg {
+	my ($ctx, $msg, $key) = splice(@_, 0, 3);
+	if (defined $ctx->{ $key }) {
+		push @{ $ctx->{$key}{refs} }, @{$msg->{refs}};
+		$msg = $ctx->{ $key };
+		$msg->{refs} = [ sort @{$msg->{refs}} ];
+	} else {
+		$ctx->{ $key } = $msg;
+	}
+	return $msg;
+}
+
+sub print_context {
+	my ($ctx, $ctxname) = splice(@_, 0, 2);
+	
+	map {
+		print_l10n_message($_)
+	} sort { $a->{refs}[0] cmp $b->{refs}[0] } map {
+		values %$_
+	} values %$ctx;
+}
+
+sub print_l10n_message {
+	my $msg = shift;
+	print "\n#: " . join( ' ', @{ $msg->{refs} } )  . "\n";
+	if ($msg->{msgctx}) {
+		print "msgctxt \"$msg->{msgctx}\"\n";
+	}
+	print "msgid \"$msg->{msgid}\"\n";
+	if ($msg->{msgplural}) {
+		print <<EOF
+msgid_plural "$msg->{msgplural}"
+msgstr[0] ""
+msgstr[1] ""
+EOF
+	} else {
+		print 'msgstr ""' . "\n";
+	}
+}
+
+sub print_pot_header {
+	my $time = `date +"%F %R%z"`;
+	chomp $time;
+	print "# SOME DESCRIPTIVE TITLE\n";
+	if (defined $options{copyright}) {
+		print "# Copyright (c) YEAR $options{copyright}\n";
+	}
+	print <<EOH
+# This file is distributed under the same license as the $options{package} package.
+# FIRST AUTHOR <EMAIL\@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: $options{package} $options{version}\\n"
+"Report-Msgid-Bugs-To: $options{bugs}\\n"
+"POT-Creation-Date: $time\\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"Last-Translator: FULL NAME <EMAIL\@ADDRESS>\\n"
+"Language-Team: LANGUAGE <LL\@li.org>\\n"
+"Language: \\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=CHARSET\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"
+EOH
+}
+
+package l10_message;
+
+sub new {
+	my $class = shift;
+	return bless {
+		msgid		=> undef,
+		msgctx		=> undef,
+		msgplural	=> undef,
+		refs			=> [],
+		@_
+	}, $class;
+}
+
+sub has_plural {
+	my $self = shift;
+	return defined $self->{msgplural};
+}
+
+sub has_context {
+	my $self = shift;
+	return defined $self->{msgctx};
+}
+
+1;
