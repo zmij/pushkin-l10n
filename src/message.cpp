@@ -75,25 +75,25 @@ message::message() : type_(EMPTY), n_(0)
 }
 
 message::message(optional_string const& domain)
-	: type_(EMPTY), n_(0), domain_(domain)
+	: type_(EMPTY), domain_(domain), n_(0)
 {
 }
 
 message::message(std::string const& id, optional_string const& domain)
-	: type_(SIMPLE), id_(id), n_(0), domain_(domain)
+	: type_(SIMPLE), id_(id), domain_(domain), n_(0)
 {
 }
 
 message::message(std::string const& context_str,
 		std::string const& id, optional_string const& domain)
-	: type_(CONTEXT), id_(id), context_(context_str), n_(0), domain_(domain)
+	: type_(CONTEXT), id_(id), context_(context_str), domain_(domain), n_(0)
 {
 }
 
 message::message(std::string const& singular,
 		std::string const& plural_str,
 		int n, optional_string const& domain)
-	: type_(PLURAL), id_(singular), plural_(plural_str), n_(n), domain_(domain)
+	: type_(PLURAL), id_(singular), plural_(plural_str), domain_(domain), n_(n)
 {
 }
 
@@ -101,14 +101,14 @@ message::message(std::string const& context,
 		std::string const& singular,
 		std::string const& plural,
 		int n, optional_string const& domain)
-	: type_(CONTEXT_PLURAL), context_(context),
-	  id_(singular), plural_(plural), n_(n), domain_(domain)
+	: type_(CONTEXT_PLURAL), id_(singular), context_(context),
+	  plural_(plural), domain_(domain), n_(n)
 {
 }
 
 message::message(message const& rhs)
-	: type_(rhs.type_), context_(rhs.context_),
-	  id_(rhs.id_), plural_(rhs.plural_), n_(rhs.n_), domain_(rhs.domain_)
+	: type_(rhs.type_), id_(rhs.id_), context_(rhs.context_),
+	  plural_(rhs.plural_), domain_(rhs.domain_), n_(rhs.n_)
 {
 	if (rhs.format_args_) {
 		format_args_.reset( new format_args{ *rhs.format_args_ });

@@ -192,12 +192,12 @@ private:
 namespace cereal {
 
 inline void
-prologue(JSONInputArchive& ar, tip::l10n::message const&) {}
+prologue(JSONInputArchive&, tip::l10n::message const&) {}
 inline void
 epilogue(JSONInputArchive&, tip::l10n::message const& ) {}
 
 inline void
-prologue(JSONOutputArchive& ar, tip::l10n::message const&) {}
+prologue(JSONOutputArchive&, tip::l10n::message const&) {}
 inline void
 epilogue(JSONOutputArchive&, tip::l10n::message const& ) {}
 
