@@ -8,7 +8,7 @@ set(lib_name l10n)
 string(TOUPPER ${lib_name} LIB_NAME)
 
 if (NOT PROJECT_PREFIX)
-    set(PROJECT_PREFIX tip)
+    set(PROJECT_PREFIX pushkin)
 endif()
 
 if (PROJECT_VERSION)
@@ -28,6 +28,7 @@ else()
     set(PROJECT_VERSION ${_pversion})
 endif()
 
+option(BUILD_TESTS "Build tests for ${lib_name} library" ON)
 #if(NOT CEREAL_INCLUDE_DIR)
 #    message(FATAL_ERROR "Please set CEREAL_INCLUDE_DIR (requires cereal fork https://github.com/zmij/cereal)")
 #endif()
@@ -50,13 +51,18 @@ include_directories(
     ${CEREAL_INCLUDE_DIR}
 )
 
-set(TIP_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name})
+set(PUSHKIN_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name})
 
 add_subdirectory(include/pushkin)
 add_subdirectory(src)
 
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
 get_directory_property(has_parent PARENT_DIRECTORY)
 if (has_parent)
-    set(TIP_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name} CACHE INTERNAL "Name of tip-util library target")
-    set(TIP_${LIB_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "Path to tip-util libaray includes" )
+    set(PUSHKIN_${LIB_NAME}_LIBRARIES ${PUSHKIN_${LIB_NAME}_LIB} CACHE INTERNAL "Name of tip-util library target")
+    set(PUSHKIN_${LIB_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "Path to tip-util libaray includes" )
 endif()
