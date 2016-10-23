@@ -248,7 +248,7 @@ public:
     using size_type                         = ::std::string::size_type;
     using localized_message                 = boost::locale::message;
 
-    enum class type {
+    enum class message_type {
         empty           = 0x00,
         simple          = 0x01,
         plural          = 0x02,
@@ -338,8 +338,33 @@ public:
 
     bool
     empty() const
-    { return type_ == type::empty || id_.empty(); }
+    { return type_ == message_type::empty || id_.empty(); }
 
+    //@{
+    /** @name Accessors */
+    message_type
+    type() const
+    { return type_; }
+
+    ::std::string const&
+    id() const
+    { return id_; }
+
+    ::std::string const&
+    plural() const;
+    ::std::string const&
+    context() const;
+    ::std::string const&
+    domain() const;
+    /**
+     * Set message domain
+     * @param New domain value
+     */
+    void
+    domain( std::string const& );
+    //@}
+    //@{
+    /** @name Check functions */
     bool
     has_context() const
     { return context_.is_initialized(); }
@@ -349,6 +374,7 @@ public:
     bool
     has_format_args() const
     { return !args_.empty(); }
+    //@}
 
     bool
     args_empty() const
@@ -356,6 +382,7 @@ public:
     size_type
     args_size() const
     { return args_.size(); }
+
     /**
      * Add argument to predefined formatting arguments
      * @param v argument value
@@ -369,9 +396,10 @@ public:
         return *this;
     }
 
-    void
-    set_domain( std::string const& );
-
+    /**
+     * Write translated and formatted message to the output stream
+     * @param os
+     */
     void
     write(std::ostream& os) const;
 
@@ -401,7 +429,7 @@ public:
         return fmt;
     }
 private:
-    type                        type_;
+    message_type                        type_;
     std::string                 id_;
     optional_string             context_;
     optional_string             plural_;

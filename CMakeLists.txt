@@ -29,9 +29,11 @@ else()
 endif()
 
 option(BUILD_TESTS "Build tests for ${lib_name} library" ON)
-#if(NOT CEREAL_INCLUDE_DIR)
-#    message(FATAL_ERROR "Please set CEREAL_INCLUDE_DIR (requires cereal fork https://github.com/zmij/cereal)")
-#endif()
+
+if(NOT COMMAND parse_argn)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/scripts/argn.cmake)
+endif()
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/scripts/l10n.cmake)
 
 add_definitions("-std=c++11")
 
@@ -39,6 +41,7 @@ set(BOOST_COMPONENTS
     system
     thread
     locale
+    program_options
 )
 
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
@@ -52,12 +55,25 @@ include_directories(
 )
 
 set(PUSHKIN_${LIB_NAME}_LIB ${PROJECT_PREFIX}-${lib_name})
+set(PUSHKIN_${LIB_NAME}_GEN_LIB ${PROJECT_PREFIX}-${lib_name}-gen)
+
+l10n_project(
+    PACKAGE ${PROJECT_NAME}
+    COPYRIGHT "Sergei A. Fedorov 2015-2016"
+    BUGS "sergei.a.fedorov@gmail.com"
+    PACKAGE_VERSION ${PROJECT_VERSION}
+    POT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations
+    MO_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/messages
+    LANGUAGES en ru
+)
+if (BUILD_TESTS)
+    enable_testing()
+endif()
 
 add_subdirectory(include/pushkin)
 add_subdirectory(src)
 
 if (BUILD_TESTS)
-    enable_testing()
     add_subdirectory(test)
 endif()
 
