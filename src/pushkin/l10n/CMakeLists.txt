@@ -8,6 +8,10 @@ set(l10n_SRCS
     message.cpp
 )
 
+if (CEREAL_INCLUDE_DIR)
+    list(APPEND l10n_SRCS message_cereal.cpp)
+endif()
+
 add_library(${PUSHKIN_L10N_LIB} SHARED ${l10n_SRCS})
 set_target_properties(
     ${PUSHKIN_L10N_LIB}

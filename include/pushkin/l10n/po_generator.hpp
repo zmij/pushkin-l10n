@@ -28,7 +28,7 @@ public:
     ~po_generator();
 
     void
-    add_message(message const&);
+    add_message(message const&, ::std::string const& comment = ::std::string{});
     void
     write(::std::ostream& os) const;
 

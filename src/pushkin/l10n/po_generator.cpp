@@ -15,11 +15,12 @@ namespace psst {
 namespace l10n {
 
 struct po_entry {
-    ::std::string id;
-    ::std::string context;
-    ::std::string plural;
-    ::std::string comment;
-    ::std::string reference;
+    using strings = ::std::vector<::std::string>;
+    ::std::string   id;
+    ::std::string   context;
+    ::std::string   plural;
+    ::std::string   reference;
+    strings mutable comments;
 
     po_entry(message const& msg)
         : id(msg.id())
@@ -62,13 +63,26 @@ struct po_entry {
 };
 
 ::std::ostream&
+escape_string(::std::ostream& os, ::std::string const& str)
+{
+    for (auto c : str) {
+        if (c == '"')
+            os.put('\\');
+        os.put(c);
+    }
+    return os;
+}
+
+::std::ostream&
 operator << (::std::ostream& os, po_entry const& val)
 {
     ::std::ostream::sentry s (os);
     if (s) {
         os << "\n";
-        if (!val.comment.empty()) {
-            os << "#. " << val.comment << "\n";
+        if (!val.comments.empty()) {
+            for (auto const& c : val.comments) {
+                os << "#. " << c << "\n";
+            }
         }
         if (!val.reference.empty()) {
             os << "#: " << val.reference << "\n";
@@ -76,15 +90,15 @@ operator << (::std::ostream& os, po_entry const& val)
             os << "#: Somewhere in a galaxy far, far away\n";
         }
         if (!val.context.empty()) {
-            os << "msgctxt \"" << val.context << "\"\n";
+            os << "msgctxt \""; escape_string(os, val.context) << "\"\n";
         }
-        os << "msgid \"" << val.id << "\"\n";
+        os << "msgid \""; escape_string(os, val.id) << "\"\n";
         if (!val.plural.empty()) {
-            os  << "msgid_plural \"" << val.plural << "\"\n"
-                << "msgstr[0] \"" << val.id << "\"\n"
-                << "msgstr[1] \"" << val.plural << "\"\n";
+            os  << "msgid_plural \""; escape_string(os, val.plural) << "\"\n";
+            os  << "msgstr[0] \""; escape_string(os, val.id) << "\"\n";
+            os  << "msgstr[1] \""; escape_string(os, val.plural) << "\"\n";
         } else {
-            os << "msgstr \"" << val.id << "\"\n";
+            os << "msgstr \""; escape_string(os, val.id) << "\"\n";
         }
     }
     return os;
@@ -132,8 +146,10 @@ struct po_generator::impl {
         ;
     }
     void
-    add_message(message const& msg)
+    add_message(message const& msg, ::std::string const& comment)
     {
+        if (msg.id().empty())
+            return;
         po_entry entry{msg};
         auto res = entries.insert(entry);
         if (!res.second) {
@@ -145,6 +161,9 @@ struct po_generator::impl {
                     "' ambiguous plural form '" + entry.plural + "'" +
                     " (was '" + res.first->plural + "')"};
             }
+        }
+        if (!comment.empty()) {
+            res.first->comments.push_back(comment);
         }
     }
 
@@ -188,9 +207,9 @@ po_generator::po_generator()
 po_generator::~po_generator() = default;
 
 void
-po_generator::add_message(message const& msg)
+po_generator::add_message(message const& msg, ::std::string const& comment)
 {
-    pimpl_->add_message(msg);
+    pimpl_->add_message(msg, comment);
 }
 
 void

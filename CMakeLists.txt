@@ -71,7 +71,7 @@ if (BUILD_TESTS)
 endif()
 
 add_subdirectory(include/pushkin)
-add_subdirectory(src)
+add_subdirectory(src/pushkin/l10n)
 
 if (BUILD_TESTS)
     add_subdirectory(test)
@@ -79,6 +79,7 @@ endif()
 
 get_directory_property(has_parent PARENT_DIRECTORY)
 if (has_parent)
-    set(PUSHKIN_${LIB_NAME}_LIBRARIES ${PUSHKIN_${LIB_NAME}_LIB} CACHE INTERNAL "Name of tip-util library target")
-    set(PUSHKIN_${LIB_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "Path to tip-util libaray includes" )
+    set(PUSHKIN_${LIB_NAME}_LIBRARIES ${PUSHKIN_${LIB_NAME}_LIB} CACHE INTERNAL "Name of pushkin-l10n library target")
+    set(PUSHKIN_${LIB_NAME}_GEN_LIB ${PUSHKIN_${LIB_NAME}_GEN_LIB} CACHE INTERNAL "Name of pushkin-l10n-gen library target")
+    set(PUSHKIN_${LIB_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "Path to pushkin-l10n library includes" )
 endif()

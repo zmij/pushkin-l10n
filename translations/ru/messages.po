@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pushkin-l10n 0.1.0\n"
 "Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
-"POT-Creation-Date: 2016-10-23 23:43+0300\n"
+"POT-Creation-Date: 2016-10-24 22:38+0300\n"
 "PO-Revision-Date: 2016-10-23 23:46+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -19,26 +19,26 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: po_generator.cpp:111
+#: po_generator.cpp:125
 msgid "PO Generator Options"
 msgstr "Параметры генератора POT файлов"
 
-#: po_generator.cpp:119
+#: po_generator.cpp:133
 msgid "Package name"
 msgstr "Название пакета"
 
-#: po_generator.cpp:122
+#: po_generator.cpp:136
 msgid "Package version"
 msgstr "Версия пакета"
 
-#: po_generator.cpp:125
+#: po_generator.cpp:139
 msgid "Copyright holder"
 msgstr "Владелец авторских прав"
 
-#: po_generator.cpp:128
+#: po_generator.cpp:142
 msgid "Foreign user"
 msgstr "Не выводить информацию о правах"
 
-#: po_generator.cpp:131
+#: po_generator.cpp:145
 msgid "Send string problems to"
 msgstr "Сообщать о проблемах строк перевода"

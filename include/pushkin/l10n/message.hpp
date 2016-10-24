@@ -220,20 +220,6 @@ operator % (format& fmt, message_args const& args)
 
 }  /* namespace detail */
 
-class locale_name_facet : public std::locale::facet {
-public:
-    static std::locale::id id;
-public:
-    locale_name_facet(std::string const& n) : facet(), name_(n) {}
-    virtual ~locale_name_facet() {}
-
-    std::string const&
-    name() const
-    { return name_; }
-private:
-    std::string name_;
-};
-
 /**
  * Class for representing a message that must be translated when sending
  * to output. The message can contain predefined format arguments and
@@ -295,6 +281,11 @@ public:
 
     void
     swap(message& rhs) noexcept;
+    void
+    swap(message&& rhs) noexcept
+    {
+        swap(rhs);
+    }
 
     message&
     operator = (message const& rhs)
@@ -364,6 +355,17 @@ public:
     domain( std::string const& );
     //@}
     //@{
+    /**
+     * Make a plural message from a simple or context message.
+     * If the message is already pluralized, the plural form will be ignored.
+     * @param plural
+     * @param n
+     * @return
+     */
+    message
+    make_plural(::std::string const& plural, int n) const;
+    //@}
+    //@{
     /** @name Check functions */
     bool
     has_context() const
@@ -408,13 +410,25 @@ public:
      * @return
      */
     localized_message
-    translate() const;
+    translate(int n) const;
     /**
      * Create a format object
+     * @param feed_plural Feed plural number specified in the message to format.
      * @return
      */
     detail::format
-    format() const;
+    format(bool feed_plural = true) const
+    {
+        return format(n_, feed_plural);
+    }
+    /**
+     * Create a format object, pluralized with n
+     * @param n
+     * @param feed_plural
+     * @return
+     */
+    detail::format
+    format(int n, bool feed_plural = true) const;
 
     /**
      * Create a format object and feed a value into it.
@@ -438,9 +452,23 @@ private:
     int                         n_;
     detail::message_args        args_;
 };
+::std::ostream&
+operator << (::std::ostream& out, message::message_type val);
+::std::istream&
+operator >> (std::istream& in, message::message_type& val);
 
-std::ostream&
+::std::ostream&
 operator << (std::ostream& os, message const& v);
+
+/**
+ * Will use a domain and context facets to construct a value.
+ * The message constructed will be a simple or context message.
+ * @param is
+ * @param val
+ * @return
+ */
+::std::istream&
+operator >> (::std::istream& is, message& val);
 
 inline detail::format&
 operator % (detail::format& fmt, message const& msg)

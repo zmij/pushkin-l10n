@@ -46,6 +46,7 @@ function(l10n_project)
     set(argnames
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS LANGUAGES
         POT_DIRECTORY MO_DIRECTORY INSTALL_DIRECTORY
+        AUTO_BUILD
     )
     parse_argn("" argnames ${ARGN})
     if (NOT PACKAGE)
@@ -76,15 +77,17 @@ function(l10n_project)
     endforeach()
 
     set(L10N_DOMAINS NOTFOUND PARENT_SCOPE)
-
+    if (AUTO_BUILD)
+        set(all ALL)
+    endif()
     add_custom_target(
-        ${PACKAGE}.i18n ALL
+        ${PACKAGE}.i18n ${all}
         COMMENT "Build l10n for package ${PACKAGE}"
     )
 endfunction()
 
 function(msgmerge DOMAIN POT_FILE)
-    set(argnames SKIP_TEST INSTALL)
+    set(argnames TEST_TRANSLATION INSTALL)
     parse_argn("" ${argnames} ${ARGN})
     foreach(lang ${L10N_LANGUAGES})
         set(po_dir ${L10N_POT_DIRECTORY}/${lang})
@@ -119,7 +122,7 @@ function(msgmerge DOMAIN POT_FILE)
             DEPENDS ${po_file} ${mo_file}
         )
         add_dependencies(${DOMAIN}.l10n ${DOMAIN}.${lang}.l10n)
-        if (NOT SKIP_TEST)
+        if (TEST_TRANSLATION)
             message(STATUS "Add a test to check translation of ${DOMAIN} to ${lang}")
             add_test(
                 NAME translate-${PROJECT_NAME}-${DOMAIN}-${lang}
@@ -129,6 +132,7 @@ function(msgmerge DOMAIN POT_FILE)
             message(STATUS "Not testing translation of ${DOMAIN} to ${lang}")
         endif()
         if (INSTALL)
+            message(STATUS "Adding install target for ${mo_file}")
             install(
                 FILES ${mo_file}
                 DESTINATION ${install_dir}
@@ -142,7 +146,7 @@ function(extract_l10n)
         PROGRAM OPTIONS
         TARGET DOMAIN POT_DIRECTORY SOURCES
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS
-        INSTALL SKIP_TEST
+        INSTALL TEST_TRANSLATION
     )
     parse_argn("" argnames ${ARGN})
 
@@ -189,11 +193,16 @@ function(extract_l10n)
         COMMAND ${PROGRAM} ${XGETTEXT_OPTIONS} -o ${out_file_name} ${SOURCES}
     )
     set(l10n_target "${DOMAIN}.l10n")
-    add_custom_target(${l10n_target} ALL DEPENDS ${out_file_name})
+    if(L10N_AUTO_BUILD)
+        set(all ALL)
+    endif()
+    add_custom_target(
+        ${l10n_target} ${all}
+        DEPENDS ${out_file_name})
     if(TARGET)
         add_dependencies(${TARGET} ${l10n_target})
     endif()
-    msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} SKIP_TEST ${SKIP_TEST})
+    msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} TEST_TRANSLATION ${TEST_TRANSLATION})
     add_dependencies(${PACKAGE}.i18n ${l10n_target})
 
     if (NOT L10N_DOMAINS)

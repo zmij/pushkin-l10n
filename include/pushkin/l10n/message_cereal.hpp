@@ -15,22 +15,6 @@
 namespace psst {
 namespace l10n {
 
-/**
- * A facet for parsing from json files
- */
-class domain_name_facet : public ::std::locale::facet {
-public:
-    static ::std::locale::id id;
-public:
-    domain_name_facet(std::string const& domain) : domain_(domain) {}
-
-    ::std::string const&
-    domain() const
-    { return domain_; }
-private:
-    ::std::string domain_;
-};
-
 
 void
 load(cereal::JSONInputArchive&, message&);

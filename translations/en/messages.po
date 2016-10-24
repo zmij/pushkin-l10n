@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pushkin-l10n 0.1.0\n"
 "Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
-"POT-Creation-Date: 2016-10-23 23:43+0300\n"
+"POT-Creation-Date: 2016-10-24 22:38+0300\n"
 "PO-Revision-Date: 2016-10-23 22:11+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,26 +17,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: po_generator.cpp:111
+#: po_generator.cpp:125
 msgid "PO Generator Options"
 msgstr "PO Generator Options"
 
-#: po_generator.cpp:119
+#: po_generator.cpp:133
 msgid "Package name"
 msgstr "Package name"
 
-#: po_generator.cpp:122
+#: po_generator.cpp:136
 msgid "Package version"
 msgstr "Package version"
 
-#: po_generator.cpp:125
+#: po_generator.cpp:139
 msgid "Copyright holder"
 msgstr "Copyright holder"
 
-#: po_generator.cpp:128
+#: po_generator.cpp:142
 msgid "Foreign user"
 msgstr "Foreign user"
 
-#: po_generator.cpp:131
+#: po_generator.cpp:145
 msgid "Send string problems to"
 msgstr "Send string problems to"
