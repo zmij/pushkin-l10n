@@ -27,7 +27,11 @@ target_link_libraries(
 set(l10n_gen_SRCS
     po_generator.cpp
 )
-localize(SOURCES ${l10n_gen_SRCS} INSTALL)
+localize(
+    SOURCES ${l10n_gen_SRCS}
+    INSTALL ON
+    TEST_TRANSLATION ${CHECK_TRANSLATION}
+)
 add_library(${PUSHKIN_L10N_GEN_LIB} SHARED ${l10n_gen_SRCS})
 set_target_properties(
     ${PUSHKIN_L10N_GEN_LIB}

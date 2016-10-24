@@ -29,6 +29,8 @@ else()
 endif()
 
 option(BUILD_TESTS "Build tests for ${lib_name} library" ON)
+option(INTERPRETER_MODE "Interpreter mode (extract string, generate pot/po files)" OFF)
+option(CHECK_TRANSLATION "Generate tests to check translations" OFF)
 
 if(NOT COMMAND parse_argn)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/scripts/argn.cmake)
@@ -65,6 +67,7 @@ l10n_project(
     POT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations
     MO_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/messages
     LANGUAGES en ru
+    INTERPRETER ${INTERPRETER_MODE}
 )
 if (BUILD_TESTS)
     enable_testing()
