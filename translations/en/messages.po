@@ -1,0 +1,42 @@
+# English translations for pushkin-l10n package.
+# Copyright (C) 2016 Sergei A. Fedorov 2015-2016
+# This file is distributed under the same license as the pushkin-l10n package.
+# Automatically generated, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pushkin-l10n 0.1.0\n"
+"Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
+"POT-Creation-Date: 2016-10-23 23:43+0300\n"
+"PO-Revision-Date: 2016-10-23 22:11+0300\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: po_generator.cpp:111
+msgid "PO Generator Options"
+msgstr "PO Generator Options"
+
+#: po_generator.cpp:119
+msgid "Package name"
+msgstr "Package name"
+
+#: po_generator.cpp:122
+msgid "Package version"
+msgstr "Package version"
+
+#: po_generator.cpp:125
+msgid "Copyright holder"
+msgstr "Copyright holder"
+
+#: po_generator.cpp:128
+msgid "Foreign user"
+msgstr "Foreign user"
+
+#: po_generator.cpp:131
+msgid "Send string problems to"
+msgstr "Send string problems to"

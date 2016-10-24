@@ -1,0 +1,9 @@
+id,plural,context,n,comment
+Simple message,,,,Just a simple message
+Simple format message: {1},,,,Simple message to be used in formatting
+{1} apple,{1} apples,,1,Apple count
+{1} apple,{1} apples,,0,Apple count
+{1} apple,{1} apples,,2,Apple count
+{1} apple,{1} apples,,5,Apple count
+Open,,,,
+Open,,file,,

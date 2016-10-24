@@ -30,3 +30,14 @@
 # Build tree
 *build
 
+# Eclipse files
+.project
+.cproject
+*.settings
+
+# Compiled translation files
+*.mo
+
+# Temporaries
+*~
+

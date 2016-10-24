@@ -1,0 +1,37 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: pushkin-l 10n\n"
+"Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: Somewhere in a galaxy far, far away
+msgid "Open"
+msgstr "Abierto"
+
+#: Somewhere in a galaxy far, far away
+msgctxt "file"
+msgid "Open"
+msgstr "Abrir"
+
+#: Somewhere in a galaxy far, far away
+msgid "Simple format message: {1}"
+msgstr "Mensaje de formato simple: {1}"
+
+#: Somewhere in a galaxy far, far away
+msgid "Simple message"
+msgstr "Mensaje simple"
+
+#: Somewhere in a galaxy far, far away
+msgid "{1} apple"
+msgid_plural "{1} apples"
+msgstr[0] "{1} manzana"
+msgstr[1] "{1} manzanas"

@@ -43,7 +43,7 @@ if (NOT L10N_MSGMERGE_SCRIPT)
 endif()
 
 function(l10n_project)
-    set(argnames 
+    set(argnames
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS LANGUAGES
         POT_DIRECTORY MO_DIRECTORY INSTALL_DIRECTORY
     )
@@ -68,15 +68,15 @@ function(l10n_project)
     if (NOT EXISTS MO_DIRECTORY)
         file(MAKE_DIRECTORY ${MO_DIRECTORY})
     endif()
-    
+
     foreach(arg_name ${argnames})
         if (${arg_name})
             set(L10N_${arg_name} ${${arg_name}} PARENT_SCOPE)
         endif()
     endforeach()
-    
+
     set(L10N_DOMAINS NOTFOUND PARENT_SCOPE)
-    
+
     add_custom_target(
         ${PACKAGE}.i18n ALL
         COMMENT "Build l10n for package ${PACKAGE}"
@@ -103,8 +103,8 @@ function(msgmerge DOMAIN POT_FILE)
             COMMENT "Merge translation file domain ${DOMAIN} language ${lang}"
             DEPENDS ${POT_FILE}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${po_dir}
-            COMMAND ${CMAKE_COMMAND} -Dlang_file=${po_file} -DPOT_FILE=${POT_FILE} 
-                    -Dlang=${lang} -DMSGINIT=${MSGINIT} -DMSGMERGE=${MSGMERGE} 
+            COMMAND ${CMAKE_COMMAND} -Dlang_file=${po_file} -DPOT_FILE=${POT_FILE}
+                    -Dlang=${lang} -DMSGINIT=${MSGINIT} -DMSGMERGE=${MSGMERGE}
                     -P ${L10N_MSGMERGE_SCRIPT}
         )
         add_custom_command(
@@ -122,7 +122,7 @@ function(msgmerge DOMAIN POT_FILE)
         if (NOT SKIP_TEST)
             message(STATUS "Add a test to check translation of ${DOMAIN} to ${lang}")
             add_test(
-                NAME translate-${DOMAIN}-${lang}
+                NAME translate-${PROJECT_NAME}-${DOMAIN}-${lang}
                 COMMAND ${MSGCMP} ${po_file} ${POT_FILE}
             )
         else()
@@ -137,10 +137,10 @@ function(msgmerge DOMAIN POT_FILE)
     endforeach()
 endfunction()
 
-function(xgettext)
+function(extract_l10n)
     set(argnames
         PROGRAM OPTIONS
-        TARGET DOMAIN POT_DIRECTORY SOURCES 
+        TARGET DOMAIN POT_DIRECTORY SOURCES
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS
         INSTALL SKIP_TEST
     )
@@ -152,9 +152,9 @@ function(xgettext)
     if(NOT SOURCES)
         message(FATAL_ERROR "No sources specified for POT extraction")
     endif()
-    
+
     set(out_file_name "${DOMAIN}.pot")
-    
+
     foreach(arg_name ${argnames})
         if (NOT ${arg_name})
             if (L10N_${arg_name})
@@ -163,9 +163,9 @@ function(xgettext)
         endif()
     endforeach(arg_name ${argnames})
     set(out_file_name "${POT_DIRECTORY}/${out_file_name}")
-    
+
     set(XGETTEXT_OPTIONS ${OPTIONS})
-    
+
     if (PACKAGE)
         list(APPEND XGETTEXT_OPTIONS --package-name=${PACKAGE})
     endif()
@@ -180,10 +180,10 @@ function(xgettext)
     if (BUGS)
         list(APPEND XGETTEXT_OPTIONS --msgid-bugs-address=${BUGS})
     endif()
-    
+
     add_custom_command(
         OUTPUT ${out_file_name}
-        DEPENDS ${SOURCES}
+        DEPENDS ${PROGRAM} ${SOURCES}
         COMMENT "Extract strings for localization in domain ${DOMAIN}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMAND ${PROGRAM} ${XGETTEXT_OPTIONS} -o ${out_file_name} ${SOURCES}
@@ -195,21 +195,21 @@ function(xgettext)
     endif()
     msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} SKIP_TEST ${SKIP_TEST})
     add_dependencies(${PACKAGE}.i18n ${l10n_target})
-    
+
     if (NOT L10N_DOMAINS)
         set(L10N_DOMAINS ${DOMAIN})
     else()
         list(APPEND L10N_DOMAINS ${DOMAIN})
     endif()
-    set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)    
+    set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)
 endfunction()
 
 function(localize)
     set(
-        XGETTEXT_OPTIONS 
+        XGETTEXT_OPTIONS
         --from-code=UTF-8
         --sort-by-file
-        --keyword=translate:1,1t 
+        --keyword=translate:1,1t
         --keyword=translate:1c,2,2t
         --keyword=translate:1,2,3t
         --keyword=translate:1c,2,3,4t
@@ -218,6 +218,6 @@ function(localize)
         --keyword=ngettext:1,2
         --keyword=npgettext:1c,2,3
     )
-    xgettext(PROGRAM ${XGETTEXT} OPTIONS ${XGETTEXT_OPTIONS} ${ARGN})
-    set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)    
+    extract_l10n(PROGRAM ${XGETTEXT} OPTIONS ${XGETTEXT_OPTIONS} ${ARGN})
+    set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)
 endfunction()
