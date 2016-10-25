@@ -46,7 +46,7 @@ function(l10n_project)
     set(argnames
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS LANGUAGES
         POT_DIRECTORY MO_DIRECTORY INSTALL_DIRECTORY
-        AUTO_BUILD
+        INTERPRETER
     )
     parse_argn("" argnames ${ARGN})
     if (NOT PACKAGE)
@@ -77,13 +77,44 @@ function(l10n_project)
     endforeach()
 
     set(L10N_DOMAINS NOTFOUND PARENT_SCOPE)
-    if (AUTO_BUILD)
-        set(all ALL)
-    endif()
     add_custom_target(
-        ${PACKAGE}.i18n ${all}
+        ${PACKAGE}.i18n ALL
         COMMENT "Build l10n for package ${PACKAGE}"
     )
+endfunction()
+
+function(compile_mo DOMAIN POT_FILE)
+    set(argnames INSTALL)
+    parse_argn("" ${argnames} ${ARGN})
+    foreach(lang ${L10N_LANGUAGES})
+        set(po_dir ${L10N_POT_DIRECTORY}/${lang})
+        set(mo_dir ${L10N_MO_DIRECTORY}/${lang}/LC_MESSAGES)
+        set(install_dir ${L10N_INSTALL_DIRECTORY}/${lang}/LC_MESSAGES)
+        if (NOT EXISTS mo_dir)
+            file(MAKE_DIRECTORY ${mo_dir})
+        endif()
+        set(po_file ${po_dir}/${DOMAIN}.po)
+        set(mo_file ${mo_dir}/${DOMAIN}.mo)
+        add_custom_command(
+            OUTPUT ${mo_file}
+            COMMENT "Compile translation file domain ${DOMAIN} language ${lang} to binary format"
+            DEPENDS ${po_file}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${mo_dir}
+            COMMAND ${MSGFMT} --output-file=${mo_file} ${po_file}
+        )
+        add_custom_target(
+            ${DOMAIN}.${lang}.l10n
+            DEPENDS ${mo_file}
+        )
+        add_dependencies(${DOMAIN}.l10n ${DOMAIN}.${lang}.l10n)
+        if (INSTALL)
+            message(STATUS "Adding install target for ${mo_file}")
+            install(
+                FILES ${mo_file}
+                DESTINATION ${install_dir}
+            )
+        endif()
+    endforeach()
 endfunction()
 
 function(msgmerge DOMAIN POT_FILE)
@@ -158,7 +189,6 @@ function(extract_l10n)
     endif()
 
     set(out_file_name "${DOMAIN}.pot")
-
     foreach(arg_name ${argnames})
         if (NOT ${arg_name})
             if (L10N_${arg_name})
@@ -168,6 +198,22 @@ function(extract_l10n)
     endforeach(arg_name ${argnames})
     set(out_file_name "${POT_DIRECTORY}/${out_file_name}")
 
+    if (NOT L10N_INTERPRETER)
+        # Non-interpreter mode, compile mo files from po files in source tree
+        message(STATUS "Non-interpreter mode - compile mo files")
+        set(l10n_target "${DOMAIN}.l10n")
+        add_custom_target(
+            ${l10n_target} ALL
+            DEPENDS ${out_file_name})
+        if(TARGET)
+            add_dependencies(${TARGET} ${l10n_target})
+        endif()
+        compile_mo(${DOMAIN} ${out_file_name} INSTALL ${INSTALL})
+        add_dependencies(${PACKAGE}.i18n ${l10n_target})
+    else()
+        # Interpreter mode, extract messages to pot file, generate or
+        # merge po files for translation, compile mo files
+        message(STATUS "Interpreter mode - extract strings, generate po files")
     set(XGETTEXT_OPTIONS ${OPTIONS})
 
     if (PACKAGE)
@@ -193,17 +239,15 @@ function(extract_l10n)
         COMMAND ${PROGRAM} ${XGETTEXT_OPTIONS} -o ${out_file_name} ${SOURCES}
     )
     set(l10n_target "${DOMAIN}.l10n")
-    if(L10N_AUTO_BUILD)
-        set(all ALL)
-    endif()
-    add_custom_target(
-        ${l10n_target} ${all}
-        DEPENDS ${out_file_name})
+        add_custom_target(
+            ${l10n_target} ALL
+            DEPENDS ${out_file_name})
     if(TARGET)
         add_dependencies(${TARGET} ${l10n_target})
     endif()
-    msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} TEST_TRANSLATION ${TEST_TRANSLATION})
+        msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} TEST_TRANSLATION ${TEST_TRANSLATION})
     add_dependencies(${PACKAGE}.i18n ${l10n_target})
+    endif()
 
     if (NOT L10N_DOMAINS)
         set(L10N_DOMAINS ${DOMAIN})

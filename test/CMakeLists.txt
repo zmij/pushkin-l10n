@@ -36,12 +36,14 @@ l10n_project(
     POT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations
     MO_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/messages
     LANGUAGES en es ru
+    INTERPRETER ${INTERPRETER}
 )
 
 extract_l10n(
     PROGRAM test-gen-po
     DOMAIN l10ntest
-    SOURCES ${TEST_DATA_FILE})
+    SOURCES ${TEST_DATA_FILE}
+    TEST_TRANSLATION ${CHECK_TRANSLATION})
 
 configure_file(config.in.hpp config.hpp)
 
