@@ -176,6 +176,7 @@ function(extract_l10n)
     set(argnames
         PROGRAM OPTIONS
         TARGET DOMAIN POT_DIRECTORY SOURCES
+        WORKING_DIRECTORY
         PACKAGE PACKAGE_VERSION COPYRIGHT BUGS
         INSTALL TEST_TRANSLATION
     )
@@ -186,6 +187,9 @@ function(extract_l10n)
     endif()
     if(NOT SOURCES)
         message(FATAL_ERROR "No sources specified for POT extraction")
+    endif()
+    if(NOT WORKING_DIRECTORY)
+        set(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif()
 
     set(out_file_name "${DOMAIN}.pot")
@@ -279,4 +283,27 @@ function(localize)
     )
     extract_l10n(PROGRAM ${XGETTEXT} OPTIONS ${XGETTEXT_OPTIONS} ${ARGN})
     set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)
+endfunction()
+
+function(l10n_reset_sources VAR_NAME)
+    set(${VAR_NAME} CACHE INTERNAL "L10N source list ${VAR_NAME}")
+endfunction()
+
+function(l10n_collect_sources VAR_NAME)
+    set(l10n_options POT_DIRECTORY)
+    foreach(arg_name ${l10n_options})
+        if (NOT ${arg_name})
+            if (L10N_${arg_name})
+                set(${arg_name} ${L10N_${arg_name}})
+            endif()
+        endif()
+    endforeach(arg_name ${argnames})
+
+    set(src_list ${${VAR_NAME}})
+    foreach(src ${ARGN})
+        set(src_path ${CMAKE_CURRENT_SOURCE_DIR}/${src})
+        list(APPEND src_list ${src_path})
+    endforeach()
+    set(${VAR_NAME} ${src_list}
+        CACHE INTERNAL "L10N source list ${VAR_NAME}")
 endfunction()
