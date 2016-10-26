@@ -214,39 +214,45 @@ function(extract_l10n)
         # Interpreter mode, extract messages to pot file, generate or
         # merge po files for translation, compile mo files
         message(STATUS "Interpreter mode - extract strings, generate po files")
-    set(XGETTEXT_OPTIONS ${OPTIONS})
+        set(XGETTEXT_OPTIONS ${OPTIONS})
 
-    if (PACKAGE)
-        list(APPEND XGETTEXT_OPTIONS --package-name=${PACKAGE})
-    endif()
-    if (PACKAGE_VERSION)
-        list(APPEND XGETTEXT_OPTIONS --package-version=${PACKAGE_VERSION})
-    endif()
-    if (COPYRIGHT)
-        list(APPEND XGETTEXT_OPTIONS --copyright-holder=${COPYRIGHT})
-    else()
-        list(APPEND XGETTEXT_OPTIONS --foreign-user)
-    endif()
-    if (BUGS)
-        list(APPEND XGETTEXT_OPTIONS --msgid-bugs-address=${BUGS})
-    endif()
+        if (PACKAGE)
+            list(APPEND XGETTEXT_OPTIONS --package-name=${PACKAGE})
+        endif()
+        if (PACKAGE_VERSION)
+            list(APPEND XGETTEXT_OPTIONS --package-version=${PACKAGE_VERSION})
+        endif()
+        if (COPYRIGHT)
+            list(APPEND XGETTEXT_OPTIONS --copyright-holder=${COPYRIGHT})
+        else()
+            list(APPEND XGETTEXT_OPTIONS --foreign-user)
+        endif()
+        if (BUGS)
+            list(APPEND XGETTEXT_OPTIONS --msgid-bugs-address=${BUGS})
+        endif()
 
-    add_custom_command(
-        OUTPUT ${out_file_name}
-        DEPENDS ${PROGRAM} ${SOURCES}
-        COMMENT "Extract strings for localization in domain ${DOMAIN}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND ${PROGRAM} ${XGETTEXT_OPTIONS} -o ${out_file_name} ${SOURCES}
-    )
-    set(l10n_target "${DOMAIN}.l10n")
-        add_custom_target(
-            ${l10n_target} ALL
-            DEPENDS ${out_file_name})
-    if(TARGET)
-        add_dependencies(${TARGET} ${l10n_target})
-    endif()
+        # TODO Generate a list of sources with paths relative to pot file
+        # for correct references in the
+        # TODO Check if file exists and merge existing
+        add_custom_command(
+            OUTPUT ${out_file_name}
+            DEPENDS ${PROGRAM} ${SOURCES}
+            COMMENT "Extract strings for localization in domain ${DOMAIN}"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMAND ${PROGRAM} ${XGETTEXT_OPTIONS} -o ${out_file_name} ${SOURCES}
+        )
+        set(l10n_target "${DOMAIN}.l10n")
+            add_custom_target(
+                ${l10n_target} ALL
+                DEPENDS ${out_file_name})
+        if(TARGET)
+            add_dependencies(${TARGET} ${l10n_target})
+        endif()
+        if (TEST_TRANSLATION)
+            enable_testing()
+        endif()
         msgmerge(${DOMAIN} ${out_file_name} INSTALL ${INSTALL} TEST_TRANSLATION ${TEST_TRANSLATION})
-    add_dependencies(${PACKAGE}.i18n ${l10n_target})
+        add_dependencies(${PACKAGE}.i18n ${l10n_target})
     endif()
 
     if (NOT L10N_DOMAINS)
