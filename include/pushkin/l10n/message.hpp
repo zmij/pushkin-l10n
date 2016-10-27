@@ -231,6 +231,7 @@ operator % (format& fmt, message_args const& args)
 class message {
 public:
     using optional_string                   = boost::optional< std::string >;
+    using domain_type                       = optional_string;
     using size_type                         = ::std::string::size_type;
     using localized_message                 = boost::locale::message;
 
@@ -247,26 +248,26 @@ public:
      */
     message();
     explicit
-    message(optional_string const& domain);
+    message(domain_type const& domain);
     /**
      * Construct a message with message id
      */
     explicit
     message(std::string const& id,
-            optional_string const& domain = optional_string());
+            domain_type const& domain = domain_type{});
     /**
      * Construct a message with message id and a context
      */
     message(std::string const& context,
             std::string const& id,
-            optional_string const& domain = optional_string());
+            domain_type const& domain = domain_type{});
     /**
      * Construct a message with singular/plural
      */
     message(std::string const& singular,
             std::string const& plural,
             int n,
-            optional_string const& domain = optional_string());
+            domain_type const& domain = domain_type{});
     /**
      * Construct a message with singular/plural and a context
      */
