@@ -14,7 +14,7 @@ namespace l10n {
 
 namespace {
 void
-read_l10n(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
+read_l10n(message& msg, cereal::JSONInputArchive& ar, cereal::size_type& sz,
         message::optional_string const& domain)
 {
     if (sz < 1) {
@@ -26,7 +26,7 @@ read_l10n(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
     --sz;
 }
 void
-read_l10nn(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
+read_l10nn(message& msg, cereal::JSONInputArchive& ar, cereal::size_type& sz,
         message::optional_string const& domain)
 {
     if (sz < 3) {
@@ -39,7 +39,7 @@ read_l10nn(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
     sz -= 3;
 }
 void
-read_l10nc(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
+read_l10nc(message& msg, cereal::JSONInputArchive& ar, cereal::size_type& sz,
         message::optional_string const& domain)
 {
     if (sz < 2) {
@@ -51,7 +51,7 @@ read_l10nc(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
     sz -= 2;
 }
 void
-read_l10nnc(message& msg, cereal::JSONInputArchive& ar, message::size_type& sz,
+read_l10nnc(message& msg, cereal::JSONInputArchive& ar, cereal::size_type& sz,
         message::optional_string const& domain)
 {
     if (sz < 4) {
@@ -76,7 +76,7 @@ load(cereal::JSONInputArchive& ar, message& val)
     }
     if (ar.nodeValue().IsArray()) {
         ar.startNode();
-        message::size_type sz;
+        cereal::size_type sz;
         ar( cereal::make_size_tag(sz) );
         std::string type_str;
         ar(type_str);
