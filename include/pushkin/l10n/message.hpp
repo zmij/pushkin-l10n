@@ -21,86 +21,19 @@ namespace l10n {
 
 namespace detail {
 
-/**
- * Class to move ::boost::locale::format around
- * Caches nested formats
- */
-class format {
-public:
-    using localized_message                 = boost::locale::message;
-    using formatted_message                 = ::boost::locale::format;
-    using formatted_message_ptr             = ::std::unique_ptr<formatted_message>;
-public:
-    explicit
-    format(localized_message const&);
-    explicit
-    format(localized_message&&);
-    explicit
-    format(formatted_message_ptr&& fmt);
-
-    format(format const&) = delete; // noncopyable
-    format(format&&) = default;     // move only
-
-    ::std::string
-    str(::std::locale const& loc = ::std::locale{}) const
-    {
-        return fmt_->str(loc);
-    }
-
-    format&
-    operator % (format&& v)
-    {
-        nested_.push_back(::std::move(v));
-        *fmt_ % *nested_.back().fmt_;
-        return *this;
-    }
-    template < typename T >
-    format&
-    operator % (T const& v)
-    {
-        *fmt_ % v;
-        return *this;
-    }
-private:
-    using nested_formats = ::std::vector<format>;
-    formatted_message_ptr   fmt_;
-    nested_formats          nested_;
-
-    friend ::std::ostream&
-    operator << (::std::ostream& os, format const& val)
-    {
-        ::std::ostream::sentry s (os);
-        if (s) {
-            os << *val.fmt_;
-        }
-        return os;
-    }
-};
+class format;
 
 struct abstract_arg_value {
-    using arg_ptr           = ::std::unique_ptr<abstract_arg_value>;
+    using arg_ptr                   = ::std::unique_ptr<abstract_arg_value>;
+    using formatted_message         = ::boost::locale::format;
 
     virtual ~abstract_arg_value() = default;
 
     virtual arg_ptr
     clone() = 0;
     virtual void
-    format(format&) const = 0;
+    format(formatted_message&) const = 0;
 };
-
-inline format&
-operator % (format& fmt, abstract_arg_value const& arg)
-{
-    arg.format(fmt);
-    return fmt;
-}
-
-inline format&
-operator % (format& fmt, abstract_arg_value::arg_ptr const& arg)
-{
-    arg->format(fmt);
-    return fmt;
-}
 
 template < typename T >
 struct arg_value : abstract_arg_value {
@@ -128,7 +61,7 @@ struct arg_value : abstract_arg_value {
     }
 
     void
-    format(detail::format& fmt) const override
+    format(formatted_message& fmt) const override
     {
         fmt % value;
     }
@@ -191,6 +124,12 @@ public:
     cend() const
     { return args_.cend(); }
 
+    abstract_arg_value const&
+    back() const
+    {
+        return *args_.back();
+    }
+
     template < typename T >
     message_args&
     operator << (T&& v)
@@ -209,11 +148,81 @@ private:
     arg_values args_;
 };
 
-inline format&
-operator % (format& fmt, message_args const& args)
+/**
+ * Class to move ::boost::locale::format around
+ * Caches nested arguments and formats
+ */
+class format {
+public:
+    using localized_message         = ::boost::locale::message;
+    using formatted_message         = ::boost::locale::format;
+    using formatted_message_ptr     = ::std::unique_ptr<formatted_message>;
+public:
+    explicit
+    format(localized_message const&);
+    explicit
+    format(localized_message&&);
+    explicit
+    format(formatted_message_ptr&& fmt);
+
+    format(format const&) = delete; // noncopyable
+    format(format&&) = default;     // move only
+
+    ::std::string
+    str(::std::locale const& loc = ::std::locale{}) const
+    {
+        return fmt_->str(loc);
+    }
+
+    format&
+    operator % (format&& v)
+    {
+        nested_.push_back(::std::move(v));
+        *fmt_ % *nested_.back().fmt_;
+        return *this;
+    }
+    template < typename T >
+    format&
+    operator % (T&& v)
+    {
+        tmps_ << v;
+        tmps_.back().format(*fmt_);
+        return *this;
+    }
+    format&
+    operator % (abstract_arg_value const& v)
+    {
+        v.format(*fmt_);
+        return *this;
+    }
+    format&
+    operator % (abstract_arg_value::arg_ptr const& v)
+    {
+        v->format(*fmt_);
+        return *this;
+    }
+private:
+    using nested_formats = ::std::vector<format>;
+    formatted_message_ptr   fmt_;
+    nested_formats          nested_;
+    message_args            tmps_;
+
+    friend ::std::ostream&
+    operator << (::std::ostream& os, format const& val)
+    {
+        ::std::ostream::sentry s (os);
+        if (s) {
+            os << *val.fmt_;
+        }
+        return os;
+    }
+};
+
+inline ::boost::locale::format&
+operator % (::boost::locale::format& fmt, message_args const& args)
 {
     for (auto const& arg : args) {
-        fmt % arg;
+        arg->format(fmt);
     }
     return fmt;
 }

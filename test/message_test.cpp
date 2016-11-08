@@ -72,6 +72,41 @@ TEST(Message, NestedMessage)
     EXPECT_EQ(expected, fmt.str());
 }
 
+TEST(Message, PluralizeInPlace)
+{
+    using loc_msg = ::boost::locale::message;
+    using fmt_msg = ::boost::locale::format;
+
+    ::std::string singular = "{1} apple";
+    ::std::string plural = "{1} apples";
+
+    for (auto i = 0; i < 10; ++i) {
+        message pl(singular, plural, i);
+        loc_msg msg(singular, plural, i);
+        fmt_msg fmt{msg};
+        fmt % i;
+        EXPECT_EQ(fmt.str(), pl.format().str());
+    }
+}
+
+TEST(Message, Pluralize)
+{
+    ::std::string expected1 = "1 apple";
+    ::std::string expected5 = "5 apples";
+
+    ::std::string singular = "{1} apple";
+    ::std::string plural = "{1} apples";
+
+    message p1(singular, plural, 1);
+    message p5(singular, plural, 5);
+
+    auto fmt1 = p1.format();
+    auto fmt5 = p5.format();
+
+    EXPECT_EQ(expected1, fmt1.str());
+    EXPECT_EQ(expected5, fmt5.str());
+}
+
 }  /* namespace test */
 }  /* namespace l10n */
 }  /* namespace psst */
