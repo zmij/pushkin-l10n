@@ -81,7 +81,11 @@ operator << (::std::ostream& os, po_entry const& val)
         os << "\n";
         if (!val.comments.empty()) {
             for (auto const& c : val.comments) {
-                os << "#. " << c << "\n";
+                ::std::istringstream is{c};
+                ::std::string line;
+                while (::std::getline(is, line)) {
+                    os << "#. " << line << "\n";
+                }
             }
         }
         if (!val.reference.empty()) {
@@ -156,14 +160,35 @@ struct po_generator::impl {
             // Already there
             // Check plural form
             if (res.first->plural != entry.plural) {
-                throw ::std::runtime_error{
-                    "Message msgid '" + entry.id +
-                    "' ambiguous plural form '" + entry.plural + "'" +
-                    " (was '" + res.first->plural + "')"};
+                ::std::ostringstream os;
+                os  << "Message msgid '" << entry.id
+                    << "' ambiguous plural form '" << entry.plural << "'"
+                    << " (was '" + res.first->plural + "')";
+                if (!comment.empty()) {
+                    os << "\nComment to this entry: " << comment;
+                }
+                throw ::std::runtime_error{os.str()};
             }
         }
         if (!comment.empty()) {
             res.first->comments.push_back(comment);
+        }
+        if (msg.has_format_args()) {
+            ::std::ostringstream os;
+            os << "Formatted message, example: '" << msg.str() << "'";
+            res.first->comments.push_back(os.str());
+        } else if (msg.has_plural()) {
+            ::std::ostringstream os;
+            os << "Pluralized message, example: '" << msg.str() << "'";
+            res.first->comments.push_back(os.str());
+        }
+        message_list nested;
+        msg.collect(nested);
+        for (auto const& n : nested) {
+            ::std::ostringstream os;
+            os << "Format argument in '" << msg.id()
+                    << "', example '" << msg.str() << "'";
+            add_message(n, os.str());
         }
     }
 

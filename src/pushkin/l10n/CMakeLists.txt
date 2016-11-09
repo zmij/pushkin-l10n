@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(l10n_SRCS
     message.cpp
+    message_util.cpp
 )
 
 if (CEREAL_INCLUDE_DIR)

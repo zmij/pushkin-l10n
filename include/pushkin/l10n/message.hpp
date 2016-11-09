@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <iosfwd>
+#include <functional>
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -19,9 +20,10 @@
 namespace psst {
 namespace l10n {
 
-namespace detail {
+class message;
+using message_list = ::std::vector<message>;
 
-class format;
+namespace detail {
 
 struct abstract_arg_value {
     using arg_ptr                   = ::std::unique_ptr<abstract_arg_value>;
@@ -33,6 +35,8 @@ struct abstract_arg_value {
     clone() = 0;
     virtual void
     format(formatted_message&) const = 0;
+    virtual void
+    collect(message_list&) const {}
 };
 
 template < typename T >
@@ -239,10 +243,13 @@ operator % (::boost::locale::format& fmt, message_args const& args)
  */
 class message {
 public:
-    using optional_string                   = boost::optional< std::string >;
+    using optional_string                   = ::boost::optional< std::string >;
     using domain_type                       = optional_string;
     using size_type                         = ::std::string::size_type;
-    using localized_message                 = boost::locale::message;
+    using localized_message                 = ::boost::locale::message;
+    using get_named_param_func              = ::std::function<void(message&,
+                                                    ::std::string const& param_name)>;
+    using get_n_func                        = ::std::function<int(::std::string const& param_name)>;
 
     enum class message_type {
         empty           = 0x00,
@@ -363,6 +370,12 @@ public:
      */
     void
     domain( std::string const& );
+    int
+    get_n() const
+    { return n_; }
+    void
+    set_n(int n)
+    { n_ = n; }
     //@}
     //@{
     /**
@@ -441,7 +454,18 @@ public:
     format(int n, bool feed_plural = true) const;
 
     /**
+     * Get a string translated to specified locale
+     * @param loc
+     * @return
+     */
+    ::std::string
+    str(::std::locale const& loc = ::std::locale{}) const
+    {
+        return format().str(loc);
+    }
+    /**
      * Create a format object and feed a value into it.
+     * The value is not stored in the message object.
      * Returns the format object to enable feed operator chaining.
      */
     template < typename T >
@@ -452,6 +476,46 @@ public:
         fmt % ::std::forward<T>(val);
         return fmt;
     }
+
+    /**
+     * Collect nested messages for translation.
+     * @param
+     */
+    void
+    collect(message_list& ) const;
+
+    /**
+     * Create a message with the specified id
+     * Will replace named placeholders to enumerated, renumber the placeholders
+     * according to the order of named placeholders and call the user-provided
+     * function to feed the named parameters.
+     * @param id
+     * @param f     Function to call for feeding a named parameter to the message
+     * @return
+     */
+    static message
+    create_message(::std::string const& id, get_named_param_func f,
+            domain_type const& domain = domain_type{});
+    static message
+    create_message(std::string const& context,
+            std::string const& id,
+            get_named_param_func f,
+            domain_type const& domain = domain_type{});
+    static message
+    create_message(std::string const& singular,
+            std::string const& plural,
+            get_named_param_func f,
+            get_n_func get_n,
+            int n = 0,
+            domain_type const& domain = domain_type{});
+    static message
+    create_message(std::string const& context,
+            std::string const& singular,
+            std::string const& plural,
+            get_named_param_func f,
+            get_n_func get_n,
+            int n = 0,
+            optional_string const& domain = optional_string());
 private:
     message_type                        type_;
     std::string                 id_;
@@ -485,6 +549,51 @@ operator % (detail::format& fmt, message const& msg)
 {
     return fmt % msg.format();
 }
+
+namespace detail {
+
+template <>
+struct arg_value<message> : abstract_arg_value {
+    using value_type        = message;
+
+    explicit
+    arg_value(value_type const& v) : value{v} {}
+    explicit
+    arg_value(value_type&& v) : value{::std::move(v)} {}
+    arg_value(arg_value const& rhs) : value{rhs.value} {}
+    arg_value(arg_value&& rhs) : value{::std::move(rhs.value)} {}
+    virtual ~arg_value() = default;
+
+    void
+    swap(arg_value& rhs) noexcept
+    {
+        using ::std::swap;
+        swap(value, rhs.value);
+    }
+
+    arg_ptr
+    clone() override
+    {
+        return arg_ptr{ new arg_value{ *this } };
+    }
+
+    void
+    format(formatted_message& fmt) const override
+    {
+        fmt % value;
+    }
+
+    void
+    collect(message_list& messages) const override
+    {
+        messages.push_back(value);
+        value.collect(messages);
+    }
+
+    value_type value;
+};
+
+}  /* namespace detail */
 
 } /* namespace l10n */
 } /* namespace psst */

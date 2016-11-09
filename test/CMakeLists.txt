@@ -61,6 +61,7 @@ set(
     arg_value_test.cpp
     message_test.cpp
     message_translate_test.cpp
+    placeholders_test.cpp
 )
 
 add_executable(test-pushkin-l10n ${test_l10n_SRCS})

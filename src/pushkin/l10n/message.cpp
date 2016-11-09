@@ -7,6 +7,7 @@
 
 #include <pushkin/l10n/message.hpp>
 #include <pushkin/l10n/message_io.hpp>
+#include <pushkin/l10n/message_util.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -247,7 +248,96 @@ message::write(std::ostream& os) const
         os << locn::as::domain(domain_.value());
     }
     os << format();
+}
+
+void
+message::collect(message_list& messages) const
+{
+    for (auto const& arg : args_) {
+        arg->collect(messages);
+    }
+}
+
+message
+message::create_message(::std::string const& id, get_named_param_func f,
+            domain_type const& domain)
+{
+    auto id_phs = extract_named_placeholders(id);
+    message msg{id_phs.first, domain};
+    for (auto const& ph : id_phs.second) {
+        auto const& nm = ::boost::get<::std::string>(ph.id);
+        f(msg, nm);
+    }
+    return msg;
+}
+
+message
+message::create_message(std::string const& context,
+            std::string const& id,
+            get_named_param_func f,
+            domain_type const& domain)
+{
+    auto id_phs = extract_named_placeholders(id);
+    message msg{context, id_phs.first, domain};
+    for (auto const& ph : id_phs.second) {
+        auto const& nm = ::boost::get<::std::string>(ph.id);
+        f(msg, nm);
+    }
+    return msg;
+}
+
+message
+message::create_message(std::string const& singular,
+        std::string const& plural,
+        get_named_param_func f,
+        get_n_func get_n,
+        int n,
+        domain_type const& domain)
+{
+    auto singular_phs = extract_named_placeholders(singular);
+    auto plural_phs   = extract_named_placeholders(plural);
+    message msg{singular_phs.first, plural_phs.first, n, domain};
+    for (auto const& ph : singular_phs.second) {
+        auto const& nm = ::boost::get<::std::string>(ph.id);
+        if (ph.is_pluralizer) {
+            if (get_n) {
+                msg.set_n(get_n(nm));
+            } else {
+                f(msg, nm);
+            }
+        } else {
+            f(msg, nm);
         }
+    }
+    return msg;
+}
+
+message
+message::create_message(std::string const& context,
+        std::string const& singular,
+        std::string const& plural,
+        get_named_param_func f,
+        get_n_func get_n,
+        int n,
+        domain_type const& domain)
+{
+    auto singular_phs = extract_named_placeholders(singular);
+    auto plural_phs   = extract_named_placeholders(plural);
+    message msg{context, singular_phs.first, plural_phs.first, n, domain};
+    for (auto const& ph : singular_phs.second) {
+        auto const& nm = ::boost::get<::std::string>(ph.id);
+        if (ph.is_pluralizer) {
+            if (get_n) {
+                msg.set_n(get_n(nm));
+            }
+            if (ph.uses > 1)
+                f(msg, nm);
+        } else {
+            f(msg, nm);
+        }
+    }
+    return msg;
+}
 
 std::ostream&
 operator << (std::ostream& out, message const& val)
