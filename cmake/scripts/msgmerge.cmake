@@ -1,6 +1,6 @@
 if (EXISTS ${lang_file})
     execute_process(
-        COMMAND ${MSGMERGE} --update ${lang_file} ${POT_FILE}
+        COMMAND ${MSGMERGE} --no-fuzzy-matching --update ${lang_file} ${POT_FILE}
         OUTPUT_QUIET ERROR_QUIET
     )
 else()
