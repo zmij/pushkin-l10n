@@ -243,6 +243,7 @@ operator % (::boost::locale::format& fmt, message_args const& args)
  */
 class message {
 public:
+    using id_str_pair                       = ::std::pair<std::string,std::string>;
     using optional_string                   = ::boost::optional< std::string >;
     using domain_type                       = optional_string;
     using size_type                         = ::std::string::size_type;
@@ -272,11 +273,25 @@ public:
     message(std::string const& id,
             domain_type const& domain = domain_type{});
     /**
+     * Construct a message with message id, str
+     */
+    explicit
+    message(id_str_pair const& id_n_str,
+            domain_type const& domain = domain_type{});
+
+    /**
      * Construct a message with message id and a context
      */
     message(std::string const& context,
             std::string const& id,
             domain_type const& domain = domain_type{});
+    /**
+     * Construct a message with message id, str and a context
+     */
+    message(std::string const& context_str,
+            id_str_pair const& id_n_str,
+            domain_type const& domain = domain_type{});
+
     /**
      * Construct a message with singular/plural
      */
@@ -346,7 +361,7 @@ public:
 
     bool
     empty() const
-    { return type_ == message_type::empty || id_.empty(); }
+    { return type_ == message_type::empty || msgid_.empty(); }
 
     //@{
     /** @name Accessors */
@@ -356,7 +371,15 @@ public:
 
     ::std::string const&
     id() const
-    { return id_; }
+    { return msgid_; }
+
+    void
+    set_id(::std::string const& id)
+    { msgid_ = id; }
+
+    ::std::string const&
+    msgstr() const
+    { return msgstr_; }
 
     ::std::string const&
     plural() const;
@@ -517,8 +540,9 @@ public:
             int n = 0,
             optional_string const& domain = optional_string());
 private:
-    message_type                        type_;
-    std::string                 id_;
+    message_type                type_;
+    std::string                 msgid_;
+    std::string                 msgstr_;
     optional_string             context_;
     optional_string             plural_;
     optional_string             domain_;

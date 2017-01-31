@@ -23,7 +23,6 @@ namespace l10n {
 ::std::locale::id context_name_facet::id;
 ::std::locale::id locale_name_facet::id;
 
-
 namespace detail {
 
 format::format(localized_message const& msg)
@@ -123,20 +122,33 @@ message::message(optional_string const& domain)
 }
 
 message::message(std::string const& id, optional_string const& domain)
-    : type_(message_type::simple), id_(id), domain_(domain), n_(0)
+    : type_(message_type::simple), msgid_(id), msgstr_(id), domain_(domain), n_(0)
+{
+}
+
+message::message(id_str_pair const& id_n_str,
+        domain_type const& domain)
+    : type_(message_type::simple), msgid_(id_n_str.first), msgstr_(id_n_str.second), domain_(domain), n_(0)
 {
 }
 
 message::message(std::string const& context_str,
         std::string const& id, optional_string const& domain)
-    : type_(message_type::context), id_(id), context_(context_str), domain_(domain), n_(0)
+    : type_(message_type::context), msgid_(id), msgstr_(id), context_(context_str), domain_(domain), n_(0)
+{
+}
+
+message::message(std::string const& context_str,
+        id_str_pair const& id_n_str,
+        domain_type const& domain)
+    : type_(message_type::context), msgid_(id_n_str.first), msgstr_(id_n_str.second), context_(context_str), domain_(domain), n_(0)
 {
 }
 
 message::message(std::string const& singular,
         std::string const& plural_str,
         int n, optional_string const& domain)
-    : type_(message_type::plural), id_(singular), plural_(plural_str), domain_(domain), n_(n)
+    : type_(message_type::plural), msgid_(singular), msgstr_(singular), plural_(plural_str), domain_(domain), n_(n)
 {
 }
 
@@ -144,7 +156,7 @@ message::message(std::string const& context,
         std::string const& singular,
         std::string const& plural,
         int n, optional_string const& domain)
-    : type_(message_type::context_plural), id_(singular), context_(context),
+    : type_(message_type::context_plural), msgid_(singular), msgstr_(singular), context_(context),
       plural_(plural), domain_(domain), n_(n)
 {
 }
@@ -154,7 +166,8 @@ message::swap(message& rhs) noexcept
 {
     using std::swap;
     swap(type_, rhs.type_);
-    swap(id_, rhs.id_);
+    swap(msgid_, rhs.msgid_);
+    swap(msgstr_, rhs.msgstr_);
     swap(plural_, rhs.plural_);
     swap(context_, rhs.context_);
     swap(n_, rhs.n_);
@@ -167,7 +180,7 @@ message::plural() const
 {
     if (!plural_.is_initialized())
         throw ::std::runtime_error{
-            "Message msgid '" + id_ + "' doesn't contain a plural form" };
+            "Message msgid '" + msgid_ + "' doesn't contain a plural form" };
     return *plural_;
     }
 
@@ -176,7 +189,7 @@ message::context() const
 {
     if (!context_.is_initialized())
         throw ::std::runtime_error{
-            "Message msgid '" + id_ + "' doesn't have context" };
+            "Message msgid '" + msgid_ + "' doesn't have context" };
     return *context_;
     }
 
@@ -199,13 +212,13 @@ message::make_plural(::std::string const& plural, int n) const
 {
     switch (type_) {
         case message_type::simple:
-            return message{ id_, plural, n, domain_ };
+            return message{ msgstr_, plural, n, domain_ };
         case message_type::plural:
-            return message{ id_, *plural_, n, domain_ };
+            return message{ msgstr_, *plural_, n, domain_ };
         case message_type::context:
-            return message{ *context_, id_, plural, n, domain_ };
+            return message{ *context_, msgstr_, plural, n, domain_ };
         case message_type::context_plural:
-            return message{ *context_, id_, *plural_, n, domain_ };
+            return message{ *context_, msgstr_, *plural_, n, domain_ };
         default:
             throw ::std::runtime_error{"Cannot convert message to a plural form"};
     }
@@ -218,13 +231,13 @@ message::translate(int n) const
         case message_type::empty:
             return localized_message();
         case message_type::simple:
-            return localized_message(id_);
+            return localized_message(msgid_);
         case message_type::context:
-            return localized_message(context_.value(), id_);
+            return localized_message(context_.value(), msgid_);
         case message_type::plural:
-            return localized_message(id_, plural_.value(), n);
+            return localized_message(msgid_, plural_.value(), n);
         case message_type::context_plural:
-            return localized_message(context_.value(), id_, plural_.value(), n);
+            return localized_message(context_.value(), msgid_, plural_.value(), n);
         default:
             throw std::runtime_error("Unknown message type");
     }
@@ -354,11 +367,15 @@ operator >> (::std::istream& is, message& val)
 {
     ::std::istream::sentry s(is);
     if (s) {
-        ::std::string id;
+        ::std::string msgstr;
 
         char c;
         while(is.get(c))
-            id.push_back(c);
+            msgstr.push_back(c);
+
+        message::id_str_pair id_n_str{
+            (val.id().empty() ? msgstr : val.id()), msgstr
+        };
 
         message::optional_string domain;
         message::optional_string context;
@@ -371,9 +388,9 @@ operator >> (::std::istream& is, message& val)
         }
 
         if (context.is_initialized()) {
-            val = message{*context, id, domain};
+            val = message{*context, id_n_str, domain};
         } else {
-            val = message{id, domain};
+            val = message{id_n_str, domain};
         }
     }
     return is;

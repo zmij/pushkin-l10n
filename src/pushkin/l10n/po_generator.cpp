@@ -17,13 +17,14 @@ namespace l10n {
 struct po_entry {
     using strings = ::std::vector<::std::string>;
     ::std::string   id;
+    ::std::string   msgstr;
     ::std::string   context;
     ::std::string   plural;
     ::std::string   reference;
     strings mutable comments;
 
     po_entry(message const& msg)
-        : id(msg.id())
+        : id(msg.id()), msgstr(msg.msgstr())
     {
         if (msg.has_context()) {
             context = msg.context();
@@ -91,7 +92,7 @@ operator << (::std::ostream& os, po_entry const& val)
         if (!val.reference.empty()) {
             os << "#: " << val.reference << "\n";
         } else {
-            os << "#: Somewhere in a galaxy far, far away\n";
+            os << "#: " << val.context << "\n";
         }
         if (!val.context.empty()) {
             os << "msgctxt \""; escape_string(os, val.context) << "\"\n";
@@ -99,10 +100,10 @@ operator << (::std::ostream& os, po_entry const& val)
         os << "msgid \""; escape_string(os, val.id) << "\"\n";
         if (!val.plural.empty()) {
             os  << "msgid_plural \""; escape_string(os, val.plural) << "\"\n";
-            os  << "msgstr[0] \""; escape_string(os, val.id) << "\"\n";
+            os  << "msgstr[0] \""; escape_string(os, val.msgstr) << "\"\n";
             os  << "msgstr[1] \""; escape_string(os, val.plural) << "\"\n";
         } else {
-            os << "msgstr \""; escape_string(os, val.id) << "\"\n";
+            os << "msgstr \""; escape_string(os, val.msgstr) << "\"\n";
         }
     }
     return os;
