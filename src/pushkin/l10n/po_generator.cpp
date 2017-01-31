@@ -91,8 +91,6 @@ operator << (::std::ostream& os, po_entry const& val)
         }
         if (!val.reference.empty()) {
             os << "#: " << val.reference << "\n";
-        } else {
-            os << "#: " << val.context << "\n";
         }
         if (!val.context.empty()) {
             os << "msgctxt \""; escape_string(os, val.context) << "\"\n";
