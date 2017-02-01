@@ -99,7 +99,6 @@ operator << (::std::ostream& os, po_entry const& val)
         if (!val.plural.empty()) {
             os  << "msgid_plural \""; escape_string(os, val.plural) << "\"\n";
             os  << "msgstr[0] \""; escape_string(os, val.msgstr) << "\"\n";
-            os  << "msgstr[1] \""; escape_string(os, val.plural) << "\"\n";
         } else {
             os << "msgstr \""; escape_string(os, val.msgstr) << "\"\n";
         }

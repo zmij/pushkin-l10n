@@ -207,21 +207,22 @@ message::domain( std::string const& domain)
     domain_ = domain;
 }
 
-message
-message::make_plural(::std::string const& plural, int n) const
+void
+message::set_plural(int n)
 {
     switch (type_) {
         case message_type::simple:
-            return message{ msgstr_, plural, n, domain_ };
         case message_type::plural:
-            return message{ msgstr_, *plural_, n, domain_ };
+            type_ = message_type::plural; break;
         case message_type::context:
-            return message{ *context_, msgstr_, plural, n, domain_ };
         case message_type::context_plural:
-            return message{ *context_, msgstr_, *plural_, n, domain_ };
+            type_ = message_type::context_plural; break;
         default:
             throw ::std::runtime_error{"Cannot convert message to a plural form"};
     }
+
+    plural_ = msgid_;
+    n_ = n;
 }
 
 message::localized_message

@@ -383,8 +383,10 @@ public:
 
     ::std::string const&
     plural() const;
+
     ::std::string const&
     context() const;
+
     ::std::string const&
     domain() const;
     /**
@@ -408,8 +410,10 @@ public:
      * @param n
      * @return
      */
-    message
-    make_plural(::std::string const& plural, int n) const;
+
+    void
+    set_plural(int n);
+
     //@}
     //@{
     /** @name Check functions */
