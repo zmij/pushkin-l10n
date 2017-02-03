@@ -92,6 +92,10 @@ operator << (::std::ostream& os, po_entry const& val)
         if (!val.reference.empty()) {
             os << "#: " << val.reference << "\n";
         }
+
+        // AWM-7685 everything is fuzzy in our imperfect world
+        os << "#, fuzzy\n";
+
         if (!val.context.empty()) {
             os << "msgctxt \""; escape_string(os, val.context) << "\"\n";
         }
@@ -206,20 +210,19 @@ msgstr ""
         }
         os  << R"~("POT-Creation-Date: )~" << gen_time << "\\n\"\n"
             << R"~("PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n")~" << "\n"
-            << R"~("Last-Translator: FULL NAME <EMAIL@ADDRESS>\n")~" << "\n"
-            << R"~("Language-Team: LANGUAGE <LL@li.org>\n")~" << "\n"
-            << R"~("Language: \n")~" << "\n"
+            << R"~("Last-Translator: po-generator\n")~" << "\n"
+            << R"~("Language-Team: none\n")~" << "\n"
+            << R"~("Language: aw\n")~" << "\n"
             << R"~("MIME-Version: 1.0\n")~" << "\n"
             << R"~("Content-Type: text/plain; charset=UTF-8\n")~" << "\n"
             << R"~("Content-Transfer-Encoding: 8bit\n")~" << "\n"
+            << R"~("Plural-Forms: nplurals=1; plural=0;\n")~" << "\n"
         ;
 
-        os << "\n";
         for (auto const& entry : entries) {
             os << entry;
         }
     }
-
 };
 
 po_generator::po_generator()
