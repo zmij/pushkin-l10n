@@ -97,18 +97,19 @@ std::istream&
 operator >> (std::istream& in, message::message_type& val)
 {
     std::istream::sentry s (in);
-    if (s) {
-        std::string name;
-        if (in >> name) {
-            auto f = STRING_TO_TYPE.find(name);
-            if (f != STRING_TO_TYPE.end()) {
-                val = f->second;
-            } else {
-                val = message::message_type::empty;
-                in.setstate(std::ios_base::failbit);
-            }
+    if (!s) return in;
+
+    std::string name;
+    if (in >> name) {
+        auto f = STRING_TO_TYPE.find(name);
+        if (f != STRING_TO_TYPE.end()) {
+            val = f->second;
+        } else {
+            val = message::message_type::empty;
+            in.setstate(std::ios_base::failbit);
         }
     }
+
     return in;
 }
 
@@ -130,6 +131,8 @@ message::message(id_str_pair const& id_n_str,
         domain_type const& domain)
     : type_(message_type::simple), msgid_(id_n_str.first), msgstr_(id_n_str.second), domain_(domain), n_(0)
 {
+    if(msgstr_.find("{1}") != std::string::npos)
+        set_plural();
 }
 
 message::message(std::string const& context_str,
@@ -143,6 +146,8 @@ message::message(std::string const& context_str,
         domain_type const& domain)
     : type_(message_type::context), msgid_(id_n_str.first), msgstr_(id_n_str.second), context_(context_str), domain_(domain), n_(0)
 {
+    if(msgstr_.find("{1}") != std::string::npos)
+        set_plural();
 }
 
 message::message(std::string const& singular,
@@ -208,7 +213,7 @@ message::domain( std::string const& domain)
 }
 
 void
-message::set_plural(int n)
+message::set_plural()
 {
     switch (type_) {
         case message_type::simple:
@@ -222,6 +227,12 @@ message::set_plural(int n)
     }
 
     plural_ = msgid_;
+}
+
+void
+message::set_plural(int n)
+{
+    set_plural();
     n_ = n;
 }
 
@@ -367,33 +378,37 @@ operator << (std::ostream& out, message const& val)
 operator >> (::std::istream& is, message& val)
 {
     ::std::istream::sentry s(is);
-    if (s) {
-        ::std::string msgstr;
+    if(!s) return is;
 
-        char c;
-        while(is.get(c))
-            msgstr.push_back(c);
+    ::std::string msgstr;
 
-        message::id_str_pair id_n_str{
-            (val.id().empty() ? msgstr : val.id()), msgstr
-        };
+    char c;
+    while(is.get(c))
+        msgstr.push_back(c);
 
-        message::optional_string domain;
-        message::optional_string context;
-        auto loc = is.getloc();
-        if (::std::has_facet<domain_name_facet>(loc)) {
-            domain = ::std::use_facet<domain_name_facet>(loc).domain();
-        }
-        if (::std::has_facet<context_name_facet>(loc)) {
-            context = ::std::use_facet<context_name_facet>(loc).context();
-        }
+    message::id_str_pair id_n_str{
+        (val.id().empty() ? msgstr : val.id()), msgstr
+    };
 
-        if (context.is_initialized()) {
-            val = message{*context, id_n_str, domain};
-        } else {
-            val = message{id_n_str, domain};
-        }
+    message::optional_string domain;
+    message::optional_string context;
+    auto loc = is.getloc();
+    if (::std::has_facet<domain_name_facet>(loc)) {
+        domain = ::std::use_facet<domain_name_facet>(loc).domain();
     }
+    if (::std::has_facet<context_name_facet>(loc)) {
+        context = ::std::use_facet<context_name_facet>(loc).context();
+    }
+
+    if (context.is_initialized()) {
+        val = message{*context, id_n_str, domain};
+    } else {
+        val = message{id_n_str, domain};
+    }
+
+    if(val.msgstr().find("{1}") != std::string::npos)
+        val.set_plural();
+
     return is;
 }
 

@@ -414,6 +414,9 @@ public:
     void
     set_plural(int n);
 
+    void
+    set_plural();
+
     //@}
     //@{
     /** @name Check functions */
