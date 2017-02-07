@@ -15,7 +15,6 @@
 namespace psst {
 namespace l10n {
 
-
 void
 load(cereal::JSONInputArchive&, message&);
 void
@@ -36,8 +35,6 @@ prologue(JSONOutputArchive&, ::psst::l10n::message const&) {}
 inline void
 epilogue(JSONOutputArchive&, ::psst::l10n::message const& ) {}
 
-
 }  // namespace cereal
-
 
 #endif /* PUSHKIN_L10N_MESSAGE_CEREAL_HPP_ */
