@@ -100,7 +100,7 @@ function(compile_mo DOMAIN POT_FILE)
             COMMENT "Compile translation file domain ${DOMAIN} language ${lang} to binary format"
             DEPENDS ${po_file}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${mo_dir}
-            COMMAND ${MSGFMT} --output-file=${mo_file} ${po_file}
+            COMMAND ${MSGFMT} --use-fuzzy --output-file=${mo_file} ${po_file}
         )
         add_custom_target(
             ${DOMAIN}.${lang}.l10n
@@ -146,7 +146,7 @@ function(msgmerge DOMAIN POT_FILE)
             COMMENT "Compile translation file domain ${DOMAIN} language ${lang} to binary format"
             DEPENDS ${po_file}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${mo_dir}
-            COMMAND ${MSGFMT} --output-file=${mo_file} ${po_file}
+            COMMAND ${MSGFMT} --use-fuzzy --output-file=${mo_file} ${po_file}
         )
         add_custom_target(
             ${DOMAIN}.${lang}.l10n
