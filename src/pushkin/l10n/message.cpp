@@ -272,7 +272,11 @@ message::write(std::ostream& os) const
     if (domain_.is_initialized()) {
         os << locn::as::domain(domain_.value());
     }
-    os << format();
+    if(has_format_args()) {
+        os << format();
+    } else {
+        os << translate(n_);
+    }
 }
 
 void
