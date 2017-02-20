@@ -14,7 +14,7 @@ namespace psst {
 namespace l10n {
 namespace test {
 
-TEST(Message, Translate)
+TEST(Message, DISABLED_Translate)
 {
     namespace locn = ::boost::locale;
     locn::generator gen;
