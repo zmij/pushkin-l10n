@@ -416,6 +416,5 @@ operator >> (::std::istream& is, message& val)
     return is;
 }
 
-
 } /* namespace l10n */
 } /* namespace psst */
