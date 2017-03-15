@@ -280,6 +280,7 @@ function(localize)
         --keyword=pgettext:1c,2
         --keyword=ngettext:1,2
         --keyword=npgettext:1c,2,3
+        ${L10N_XGETTEXT_KEYWORDS}
     )
     extract_l10n(PROGRAM ${XGETTEXT} OPTIONS ${XGETTEXT_OPTIONS} ${ARGN})
     set(L10N_DOMAINS ${L10N_DOMAINS} PARENT_SCOPE)
