@@ -220,6 +220,7 @@ function(extract_l10n)
         message(STATUS "Interpreter mode - extract strings, generate po files")
         set(XGETTEXT_OPTIONS ${OPTIONS})
 
+        list(APPEND     XGETTEXT_OPTIONS --add-location=file)
         if (PACKAGE)
             list(APPEND XGETTEXT_OPTIONS --package-name=${PACKAGE})
         endif()
