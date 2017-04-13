@@ -18,6 +18,7 @@ try {
     namespace po = ::boost::program_options;
     ::std::string out_file_name{ "messages.pot" };
     po::options_description opts_desc{"Main options"};
+    std::string add_location;
     bool verbose{false};
     opts_desc.add_options()
         ("help,h", "show options description")
@@ -25,6 +26,9 @@ try {
             po::value<::std::string>(&out_file_name)
                 ->default_value("messages.pot"),
             "Name of output pot file")
+        ("add-location",
+            po::value<::std::string>(&add_location),
+            "Fake add-location")
         ("verbose,v",
             po::bool_switch(&verbose),
             "Be verbose")
