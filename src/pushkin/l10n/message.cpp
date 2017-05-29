@@ -25,21 +25,6 @@ namespace l10n {
 
 namespace detail {
 
-format::format(localized_message const& msg)
-    : fmt_{ new formatted_message{ msg } }
-{
-}
-
-format::format(localized_message&& msg)
-    : fmt_{ new formatted_message{ ::std::move(msg) } }
-{
-}
-
-format::format(formatted_message_ptr&& fmt)
-    : fmt_{ ::std::move(fmt) }
-{
-}
-
 message_args::message_args(message_args const& rhs)
     : args_{}
 {
@@ -111,6 +96,21 @@ operator >> (std::istream& in, message::message_type& val)
     }
 
     return in;
+}
+
+format::format(localized_message const& msg)
+    : fmt_{ new formatted_message{ msg } }
+{
+}
+
+format::format(localized_message&& msg)
+    : fmt_{ new formatted_message{ ::std::move(msg) } }
+{
+}
+
+format::format(formatted_message_ptr&& fmt)
+    : fmt_{ ::std::move(fmt) }
+{
 }
 
 message::message() : type_(message_type::empty), n_(0)
@@ -255,10 +255,10 @@ message::translate(int n) const
     }
 }
 
-detail::format
+format
 message::format(int n, bool feed_plural) const
 {
-    detail::format fmt{translate(n)};
+    l10n::format fmt{translate(n)};
     if (has_plural() && feed_plural)
         fmt % n;
     fmt % args_;

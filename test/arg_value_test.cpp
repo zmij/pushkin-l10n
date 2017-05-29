@@ -44,11 +44,11 @@ TEST(Args, Move)
 
 TEST(Args, Format)
 {
-    message::localized_message format{"{3}{2}={1}"};
+    message::localized_message fmt_str{"{3}{2}={1}"};
     ::std::string expected{"BarFoo=42"};
     {
         // One by one
-        detail::format fmt{format};
+        format fmt{fmt_str};
         detail::message_args args;
         EXPECT_NO_THROW(args << 42 << "Foo" << "Bar") << "Add argument";
         for (auto const& arg : args) {
@@ -59,7 +59,7 @@ TEST(Args, Format)
 
     {
         // Call container func
-        detail::format fmt{format};
+        format fmt{fmt_str};
         detail::message_args args;
         EXPECT_NO_THROW(args << 42 << "Foo" << "Bar") << "Add argument";
         fmt % args;

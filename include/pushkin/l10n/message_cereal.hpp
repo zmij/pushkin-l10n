@@ -20,6 +20,23 @@ load(cereal::JSONInputArchive&, message&);
 void
 save(cereal::JSONOutputArchive&, message const&);
 
+inline void
+load(cereal::JSONInputArchive&, format&) {}
+void
+save(cereal::JSONOutputArchive&, format const&);
+
+inline void
+load(cereal::JSONInputArchive& ar, format_shared_ptr v)
+{
+    ar(*v);
+}
+
+inline void
+save(cereal::JSONOutputArchive& ar, format_shared_ptr const& v)
+{
+    ar(*v);
+}
+
 }  /* namespace l10n */
 }  /* namespace psst */
 
@@ -34,6 +51,26 @@ inline void
 prologue(JSONOutputArchive&, ::psst::l10n::message const&) {}
 inline void
 epilogue(JSONOutputArchive&, ::psst::l10n::message const& ) {}
+
+inline void
+prologue(JSONInputArchive&, ::psst::l10n::format const&) {}
+inline void
+epilogue(JSONInputArchive&, ::psst::l10n::format const& ) {}
+
+inline void
+prologue(JSONOutputArchive&, ::psst::l10n::format const&) {}
+inline void
+epilogue(JSONOutputArchive&, ::psst::l10n::format const& ) {}
+
+inline void
+prologue(JSONInputArchive&, ::psst::l10n::format_shared_ptr const&) {}
+inline void
+epilogue(JSONInputArchive&, ::psst::l10n::format_shared_ptr const& ) {}
+
+inline void
+prologue(JSONOutputArchive&, ::psst::l10n::format_shared_ptr const&) {}
+inline void
+epilogue(JSONOutputArchive&, ::psst::l10n::format_shared_ptr const& ) {}
 
 }  // namespace cereal
 

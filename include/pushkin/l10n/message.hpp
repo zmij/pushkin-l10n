@@ -152,6 +152,17 @@ private:
     arg_values args_;
 };
 
+inline ::boost::locale::format&
+operator % (::boost::locale::format& fmt, message_args const& args)
+{
+    for (auto const& arg : args) {
+        arg->format(fmt);
+    }
+    return fmt;
+}
+
+}  /* namespace detail */
+
 /**
  * Class to move ::boost::locale::format around
  * Caches nested arguments and formats
@@ -178,38 +189,38 @@ public:
         return fmt_->str(loc);
     }
 
-    format&
+    format&&
     operator % (format&& v)
     {
         nested_.push_back(::std::move(v));
         *fmt_ % *nested_.back().fmt_;
-        return *this;
+        return ::std::move(*this);
     }
     template < typename T >
-    format&
+    format&&
     operator % (T&& v)
     {
         tmps_ << v;
         tmps_.back().format(*fmt_);
-        return *this;
+        return ::std::move(*this);
     }
-    format&
-    operator % (abstract_arg_value const& v)
+    format&&
+    operator % (detail::abstract_arg_value const& v)
     {
         v.format(*fmt_);
-        return *this;
+        return ::std::move(*this);
     }
-    format&
-    operator % (abstract_arg_value::arg_ptr const& v)
+    format&&
+    operator % (detail::abstract_arg_value::arg_ptr const& v)
     {
         v->format(*fmt_);
-        return *this;
+        return ::std::move(*this);
     }
 private:
     using nested_formats = ::std::vector<format>;
     formatted_message_ptr   fmt_;
     nested_formats          nested_;
-    message_args            tmps_;
+    detail::message_args    tmps_;
 
     friend ::std::ostream&
     operator << (::std::ostream& os, format const& val)
@@ -222,16 +233,7 @@ private:
     }
 };
 
-inline ::boost::locale::format&
-operator % (::boost::locale::format& fmt, message_args const& args)
-{
-    for (auto const& arg : args) {
-        arg->format(fmt);
-    }
-    return fmt;
-}
-
-}  /* namespace detail */
+using format_shared_ptr = ::std::shared_ptr<format>;
 
 /**
  * Class for representing a message that must be translated when sending
@@ -469,7 +471,7 @@ public:
      * @param feed_plural Feed plural number specified in the message to format.
      * @return
      */
-    detail::format
+    l10n::format
     format(bool feed_plural = true) const
     {
         return format(n_, feed_plural);
@@ -480,7 +482,7 @@ public:
      * @param feed_plural
      * @return
      */
-    detail::format
+    l10n::format
     format(int n, bool feed_plural = true) const;
 
     /**
@@ -491,7 +493,7 @@ public:
     ::std::string
     str(::std::locale const& loc = ::std::locale{}) const
     {
-        return format().str(loc);
+        return this->format().str(loc);
     }
     /**
      * Create a format object and feed a value into it.
@@ -499,10 +501,10 @@ public:
      * Returns the format object to enable feed operator chaining.
      */
     template < typename T >
-    detail::format
+    l10n::format
     operator % (T&& val) const
     {
-        auto fmt = format();
+        auto fmt = this->format();
         fmt % ::std::forward<T>(val);
         return fmt;
     }
@@ -575,8 +577,8 @@ operator << (std::ostream& os, message const& v);
 ::std::istream&
 operator >> (::std::istream& is, message& val);
 
-inline detail::format&
-operator % (detail::format& fmt, message const& msg)
+inline format&&
+operator % (format& fmt, message const& msg)
 {
     return fmt % msg.format();
 }

@@ -124,6 +124,15 @@ save(cereal::JSONOutputArchive& ar, message const& msg)
     ar(os.str());
 }
 
+void
+save(cereal::JSONOutputArchive& ar, format const& fmt)
+{
+    std::ostringstream os;
+    os.imbue(ar.getloc());
+    os << fmt;
+    ar(os.str());
+}
+
 
 }  /* namespace l10n */
 }  /* namespace psst */
