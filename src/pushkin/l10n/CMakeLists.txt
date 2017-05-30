@@ -11,6 +11,7 @@ set(l10n_SRCS
 
 if (CEREAL_INCLUDE_DIR)
     list(APPEND l10n_SRCS message_cereal.cpp)
+    include_directories(${CEREAL_INCLUDE_DIR})
 endif()
 
 add_library(${PUSHKIN_L10N_LIB} SHARED ${l10n_SRCS})
