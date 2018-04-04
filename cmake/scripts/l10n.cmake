@@ -272,7 +272,7 @@ function(localize)
     set(
         XGETTEXT_OPTIONS
         --from-code=UTF-8
-        --sort-by-file
+        --sort-output
         --keyword=translate:1,1t
         --keyword=translate:1c,2,2t
         --keyword=translate:1,2,3t
