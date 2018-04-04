@@ -177,11 +177,11 @@ struct po_generator::impl {
         }
         if (msg.has_format_args()) {
             ::std::ostringstream os;
-            os << "Formatted message, example: '" << msg.str() << "'";
+            // os << "Formatted message, example: '" << msg.str() << "'";
             res.first->comments.push_back(os.str());
         } else if (msg.has_plural()) {
             ::std::ostringstream os;
-            os << "Pluralized message, example: '" << msg.str() << "'";
+            // os << "Pluralized message, example: '" << msg.str() << "'";
             res.first->comments.push_back(os.str());
         }
         message_list nested;
