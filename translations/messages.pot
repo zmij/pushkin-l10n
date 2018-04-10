@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR Sergei A. Fedorov 2015-2016
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the awm-l10n package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: awm-l10n 0.1.0\n"
 "Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
-"POT-Creation-Date: 2016-10-24 22:38+0300\n"
+"POT-Creation-Date: 2018-04-10 15:26+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,26 +17,20 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: po_generator.cpp:125
-msgid "PO Generator Options"
-msgstr ""
-
-#: po_generator.cpp:133
-msgid "Package name"
-msgstr ""
-
-#: po_generator.cpp:136
-msgid "Package version"
-msgstr ""
-
-#: po_generator.cpp:139
 msgid "Copyright holder"
 msgstr ""
 
-#: po_generator.cpp:142
 msgid "Foreign user"
 msgstr ""
 
-#: po_generator.cpp:145
+msgid "PO Generator Options"
+msgstr ""
+
+msgid "Package name"
+msgstr ""
+
+msgid "Package version"
+msgstr ""
+
 msgid "Send string problems to"
 msgstr ""

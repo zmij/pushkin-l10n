@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pushkin-l10n 0.1.0\n"
 "Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
-"POT-Creation-Date: 2016-10-24 22:38+0300\n"
+"POT-Creation-Date: 2018-04-10 15:26+0300\n"
 "PO-Revision-Date: 2016-10-23 23:46+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,30 +15,23 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: po_generator.cpp:125
-msgid "PO Generator Options"
-msgstr "Параметры генератора POT файлов"
-
-#: po_generator.cpp:133
-msgid "Package name"
-msgstr "Название пакета"
-
-#: po_generator.cpp:136
-msgid "Package version"
-msgstr "Версия пакета"
-
-#: po_generator.cpp:139
 msgid "Copyright holder"
 msgstr "Владелец авторских прав"
 
-#: po_generator.cpp:142
 msgid "Foreign user"
 msgstr "Не выводить информацию о правах"
 
-#: po_generator.cpp:145
+msgid "PO Generator Options"
+msgstr "Параметры генератора POT файлов"
+
+msgid "Package name"
+msgstr "Название пакета"
+
+msgid "Package version"
+msgstr "Версия пакета"
+
 msgid "Send string problems to"
 msgstr "Сообщать о проблемах строк перевода"

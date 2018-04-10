@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pushkin-l 10n\n"
 "Report-Msgid-Bugs-To: sergei.a.fedorov@gmail.com\n"
-"POT-Creation-Date: 2017-02-03 13:06Z\n"
+"POT-Creation-Date: 2018-04-10 12:26Z\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -26,10 +26,6 @@ msgstr "Mensaje de formato simple: {1}"
 msgid "Simple message"
 msgstr "Mensaje simple"
 
-#. Pluralized message, example: '1 apple'
-#. Pluralized message, example: '0 apples'
-#. Pluralized message, example: '2 apples'
-#. Pluralized message, example: '5 apples'
 msgid "{1} apple"
 msgid_plural "{1} apples"
 msgstr[0] "{1} manzana"
